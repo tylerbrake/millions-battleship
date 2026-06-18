@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Millions – Team B Command</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=IM+Fell+English&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090e;--panel:#10131a;--border:#252830;
+  --gold:#c9a227;--gold-dim:#7a621a;--text:#c8c2b0;--text-dim:#5a5650;
+  --teamcolor:#e0517a;--hit:rgba(210,35,35,0.9);--miss:rgba(25,70,180,0.84);
+  --cell:40px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'IM Fell English',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 10px 48px;overflow-x:hidden;}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
+header,.tabs,.banner,.layout{position:relative;z-index:1;}
+header{text-align:center;padding:28px 0 10px;}
+header h1{font-family:'Cinzel',serif;font-size:clamp(1.4rem,4vw,2.1rem);font-weight:900;letter-spacing:.13em;color:var(--teamcolor);text-shadow:0 0 30px #e0517a66,0 0 70px #e0517a33,0 2px 0 #000;animation:titlePulse 5s ease-in-out infinite;}
+@keyframes titlePulse{0%,100%{opacity:.85;}50%{opacity:1;}}
+header p{font-size:.75rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08em;}
+
+.tabs{display:flex;justify-content:center;gap:8px;margin-bottom:18px;}
+.tab{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;padding:9px 22px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--text-dim);cursor:pointer;transition:all .15s;}
+.tab:hover{border-color:var(--gold-dim);color:var(--gold);}
+.tab.active{border-color:var(--gold);color:var(--gold);background:#1a1608;box-shadow:0 0 14px #c9a22733;}
+
+.fleet-gate-card{max-width:320px;margin:30px auto;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:28px 30px;text-align:center;}
+.fleet-gate-card h2{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:8px;}
+.fleet-gate-card p{font-size:.76rem;color:var(--text-dim);margin-bottom:14px;}
+.fleet-gate-card input{width:100%;background:#0b0e15;border:1px solid var(--border);border-radius:4px;padding:9px 12px;color:var(--text);font-family:'IM Fell English',serif;margin-bottom:10px;outline:none;}
+.fleet-gate-card input:focus{border-color:var(--gold-dim);}
+.fleet-gate-card button{width:100%;font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.08em;padding:9px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;}
+.fleet-gate-card button:hover{box-shadow:0 0 14px #c9a22744;}
+.gate-error{color:#d06060;font-size:.7rem;margin-top:8px;min-height:14px;}
+
+.banner{max-width:680px;margin:0 auto 16px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 16px;font-size:.72rem;color:var(--text-dim);text-align:center;line-height:1.6;}
+
+.team-settings{max-width:480px;margin:0 auto 14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;}
+.settings-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:.72rem;}
+.settings-row label{width:100px;color:var(--text-dim);flex-shrink:0;}
+.settings-row input{flex:1;background:#0b0e15;border:1px solid var(--border);border-radius:4px;padding:6px 9px;color:var(--text);font-family:'IM Fell English',serif;outline:none;}
+.settings-row input:focus{border-color:var(--gold-dim);}
+.settings-row button{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.05em;padding:6px 12px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;white-space:nowrap;}
+.settings-row button:hover{box-shadow:0 0 10px #c9a22744;}
+.settings-msg{font-size:.66rem;color:var(--gold);text-align:center;min-height:14px;}
+
+.layout{display:flex;gap:16px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.sidebar{flex-shrink:0;width:188px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 12px;}
+.sidebar h3{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--gold-dim);text-align:center;text-transform:uppercase;margin-bottom:8px;}
+.sdivider{height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:8px 0;}
+.ship-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:4px;cursor:pointer;font-size:.74rem;margin-bottom:3px;border:1px solid transparent;}
+.ship-row:hover{background:#161a23;}
+.ship-row.selected{border-color:var(--gold);background:#1a1608;}
+.ship-swatch{width:13px;height:13px;border-radius:3px;flex-shrink:0;border:1px solid #0006;}
+.ship-row .sname{flex:1;color:var(--text);}
+.ship-row .scount{color:var(--text-dim);font-size:.64rem;}
+.progress{font-size:.66rem;color:var(--text-dim);text-align:center;margin-top:8px;}
+.progress strong{color:var(--gold);}
+
+.board-glow-wrap{position:relative;}
+.board-glow-wrap::before{content:'';position:absolute;inset:-24px;background:radial-gradient(ellipse at center,#c9a2271a 0%,transparent 68%);border-radius:14px;pointer-events:none;animation:pulseGlow 4s ease-in-out infinite;}
+@keyframes pulseGlow{0%,100%{opacity:.5;}50%{opacity:1;}}
+.board-wrap{overflow-x:auto;max-width:100%;padding-bottom:4px;position:relative;z-index:1;}
+.col-headers,.grid{display:grid;grid-template-columns:20px repeat(16,var(--cell));gap:2px;}
+.col-headers{margin-bottom:3px;}
+.col-header,.row-header{font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;color:var(--gold-dim);display:flex;align-items:center;justify-content:center;}
+.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;border:2px solid #252830;background:#0b0e15;cursor:pointer;overflow:hidden;transition:transform .12s,box-shadow .2s,border-color .2s;display:flex;align-items:center;justify-content:center;}
+.cell:hover{transform:scale(1.14);z-index:10;box-shadow:0 0 16px #c9a22755,0 0 5px #c9a22777;}
+.cell img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 1px 4px rgba(0,0,0,1));}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;opacity:0;transition:opacity .18s;}
+.cell[data-shot="hit"] .overlay{background:var(--hit);opacity:1;}
+.cell[data-shot="miss"] .overlay{background:var(--miss);opacity:1;}
+.cell[data-shot="hit"] .overlay::after{content:"💥";}
+.cell[data-shot="miss"] .overlay::after{content:"💨";}
+.cell.locked{cursor:not-allowed;opacity:.75;}
+.tooltip{position:fixed;background:#12141c;border:1px solid var(--gold-dim);border-radius:4px;padding:5px 11px;font-size:.72rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:260px;line-height:1.5;}
+.conn-status{position:fixed;top:8px;right:10px;font-size:.6rem;color:var(--text-dim);z-index:50;}
+.conn-status.ok{color:#4ade80;}
+.conn-status.err{color:#d06060;}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="conn-status" id="conn-status">Connecting…</div>
+
+<header>
+  <h1 id="team-header-name">⚓ TEAM B COMMAND ⚓</h1>
+  <p>Millions Battleship Event</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-fleet" onclick="showTab('fleet')">My Fleet</button>
+  <button class="tab" id="tab-fire" onclick="showTab('fire')">Enemy Waters</button>
+</div>
+
+<div id="view-fleet">
+  <div class="fleet-gate-card" id="fleet-gate">
+    <h2>🔒 My Fleet — Locked</h2>
+    <p>Enter the team captain password to place your fleet.</p>
+    <input type="password" id="fleet-gate-input" placeholder="Password">
+    <button onclick="checkFleetPassword()">Unlock</button>
+    <div class="gate-error" id="fleet-gate-error"></div>
+  </div>
+
+  <div id="fleet-content" style="display:none">
+    <div class="team-settings">
+      <div class="settings-row">
+        <label>Team Name</label>
+        <input type="text" id="team-name-input" value="Team B">
+        <button onclick="saveTeamName()">Save</button>
+      </div>
+      <div class="settings-row">
+        <label>New Password</label>
+        <input type="password" id="new-password-input" placeholder="Set a new password">
+        <button onclick="updatePassword()">Update</button>
+      </div>
+      <div class="settings-msg" id="settings-msg"></div>
+    </div>
+    <div class="banner">Select a ship below, then click tiles to mark its position. Incoming enemy shots will appear here as they land.</div>
+    <div class="layout">
+      <div class="sidebar">
+        <h3>⚓ Fleet</h3>
+        <div id="ship-list"></div>
+        <div class="sdivider"></div>
+        <div class="progress" id="ship-progress"></div>
+      </div>
+      <div class="board-glow-wrap">
+        <div class="board-wrap">
+          <div class="col-headers" id="fleet-col-headers"></div>
+          <div class="grid" id="fleet-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="view-fire" style="display:none">
+  <div class="banner">This is Team A's waters. Click a tile to fire — you won't know what's there until you do.</div>
+  <div class="layout">
+    <div class="board-glow-wrap">
+      <div class="board-wrap">
+        <div class="col-headers" id="fire-col-headers"></div>
+        <div class="grid" id="fire-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+// ── Particles (matches original board) ──────────────────────
+(function(){
+  const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+  let W,H,P=[];const N=110;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function mp(fe){
+    let x;if(fe||Math.random()<0.65){const ew=W*0.18;x=Math.random()<0.5?rnd(2,ew):rnd(W-ew,W-2);}else x=rnd(0,W);
+    const sz=Math.random()<0.15?rnd(2.5,4.5):rnd(0.8,2.2);
+    return{x,y:rnd(-20,H+20),size:sz,sy:-rnd(0.15,0.65),sx:rnd(-0.12,0.12),a:rnd(0.1,0.5),ad:Math.random()<0.5?1:-1,as:rnd(0.002,0.008),h:rnd(34,54),gr:sz*rnd(2.5,4.5)};
+  }
+  for(let i=0;i<N;i++)P.push(mp(i<N*0.65));
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    P.forEach(p=>{
+      p.y+=p.sy;p.x+=p.sx;p.a+=p.ad*p.as;if(p.a>0.55||p.a<0.04)p.ad*=-1;
+      if(p.y<-30||p.x<-20||p.x>W+20){Object.assign(p,mp(Math.random()<0.65));p.y=H+10;}
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.gr);
+      g.addColorStop(0,`hsla(${p.h},88%,65%,${p.a})`);g.addColorStop(0.4,`hsla(${p.h},80%,52%,${p.a*0.45})`);g.addColorStop(1,`hsla(${p.h},70%,40%,0)`);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.gr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    });requestAnimationFrame(draw);
+  }draw();
+})();
+
+// ── Firebase ──────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAEE9_TrWUImNIBq0Z7p0i57EMeVu-V4F4",
+  authDomain: "battleship-board.firebaseapp.com",
+  databaseURL: "https://battleship-board-default-rtdb.firebaseio.com",
+  projectId: "battleship-board",
+  storageBucket: "battleship-board.firebasestorage.app",
+  messagingSenderId: "628879050531",
+  appId: "1:628879050531:web:87a3336c858e563c282e96"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const TEAM_PATH = 'battleship/teams/teamB';
+const OPPONENT_PATH = 'battleship/teams/teamA';
+
+db.ref('.info/connected').on('value', snap=>{
+  const el=document.getElementById('conn-status');
+  if(snap.val()===true){el.textContent='● Live';el.className='conn-status ok';}
+  else{el.textContent='● Reconnecting…';el.className='conn-status err';}
+});
+
+async function sha256(text){
+  const enc=new TextEncoder().encode(text);
+  const buf=await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+let fleetUnlocked = false;
+let TEAM_PASSWORD_HASH = null;
+let teamName = 'Team B';
+
+async function initPasswordHash(){
+  const snap = await db.ref(TEAM_PATH+'/passwordHash').once('value');
+  if(snap.exists()){ TEAM_PASSWORD_HASH = snap.val(); }
+  else{ TEAM_PASSWORD_HASH = await sha256('millionsB'); await db.ref(TEAM_PATH+'/passwordHash').set(TEAM_PASSWORD_HASH); }
+}
+
+async function checkFleetPassword(){
+  const val = document.getElementById('fleet-gate-input').value;
+  const hash = await sha256(val);
+  if(hash === TEAM_PASSWORD_HASH){
+    fleetUnlocked = true;
+    document.getElementById('fleet-gate').style.display = 'none';
+    document.getElementById('fleet-content').style.display = 'block';
+    renderFleetBoard();
+  } else {
+    document.getElementById('fleet-gate-error').textContent = 'Incorrect password.';
+  }
+}
+document.getElementById('fleet-gate-input').addEventListener('keydown', e => { if(e.key === 'Enter') checkFleetPassword(); });
+
+async function updatePassword(){
+  const val = document.getElementById('new-password-input').value;
+  if(!val) return;
+  TEAM_PASSWORD_HASH = await sha256(val);
+  await db.ref(TEAM_PATH+'/passwordHash').set(TEAM_PASSWORD_HASH);
+  document.getElementById('new-password-input').value = '';
+  showSettingsMsg('Password updated and saved.');
+}
+
+function updateHeaderName(){
+  document.getElementById('team-header-name').textContent = '⚓ ' + teamName.toUpperCase() + ' COMMAND ⚓';
+}
+async function initTeamName(){
+  const snap = await db.ref(TEAM_PATH+'/name').once('value');
+  if(snap.exists()){ teamName = snap.val(); } else { await db.ref(TEAM_PATH+'/name').set(teamName); }
+  updateHeaderName();
+  document.getElementById('team-name-input').value = teamName;
+  db.ref(TEAM_PATH+'/name').on('value', s=>{
+    if(s.exists() && s.val()!==teamName){
+      teamName=s.val();updateHeaderName();
+      document.getElementById('team-name-input').value=teamName;
+    }
+  });
+}
+async function saveTeamName(){
+  const val = document.getElementById('team-name-input').value.trim();
+  if(!val) return;
+  teamName = val;
+  updateHeaderName();
+  await db.ref(TEAM_PATH+'/name').set(teamName);
+  showSettingsMsg('Team name updated and saved.');
+}
+function showSettingsMsg(text){
+  const el = document.getElementById('settings-msg');
+  el.textContent = text;
+  setTimeout(()=>{ if(el.textContent === text) el.textContent=''; }, 4500);
+}
+
+const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+const ROWS = 16;
+const BASE = 'https://oldschool.runescape.wiki/images/';
+
+const DEF={
+  tb:['Verzik_Vitur.png','ToB Purple'], ta:['Tumeken%27s_Warden.png','ToA Purple'], cx:['Great_Olm.png','CoX Purple'],
+  d2:['Virtus_robe_top.png','DT2 Unique'], mu:['Venator_shard.png','Venator Shard'], ze:['Zenyte_shard.png','Zenyte Shard'],
+  mo:['Blood_moon_helm.png','Moons of Peril'], zu:['Tanzanite_fang.png','Zulrah Unique'], ga:['Bandos_tassets.png','GWD Armour'],
+  ba:['Ahrim%27s_robetop.png','Barrows Unique'], nx:['Torva_full_helm.png','Nex Unique'], ya:['Abyssal_lantern.png','Yama Unique'],
+  co:['Sunfire_fanatic_helm.png','Colosseum Unique'], cb:['Primordial_crystal.png','Cerberus Unique'], hy:['Hydra%27s_claw.png','Hydra Unique'],
+  ax:['Araxyte_fang.png','Araxxor Unique'], dm:['Doom_of_Mokhaiotl.png','Doom Unique'], sd:['Crystal_armour_seed.png','Crystal Seed'],
+  vd:['Voidwaker_gem.png','Voidwaker Piece'], gh:['Bandos_hilt.png','Godsword Hilt'], wt:['Tome_of_fire.png','Wintertodt Unique'],
+  tp:['Dragon_harpoon.png','Tempoross Unique'], gr:['Abyssal_needle.png','GotR Unique'], dk:['Seers_ring.png','DK Unique'],
+  ni:['Inquisitor%27s_great_helm.png','Nightmare Unique'], 'if':['Infernal_cape.png','Inferno Unique'], ab:['Abyssal_dagger.png','Abyssal Sire Unique'],
+  rv:['Zalcano_shard.png','Zalcano Unique'], cs:['Imp_champion_scroll_detail.png','Champion Scroll'], sk:null, hk:null,
+};
+const SK_BY_Q=[['Fishing_cape.png','Fishing'],['Slayer_cape.png','Slayer'],['Firemaking_cape.png','Firemaking'],['Runecraft_cape.png','Runecrafting']];
+const HK_BY_Q=[['Sanguine_ornament_kit.png','Sanguine Kit'],['Holy_ornament_kit.png','Holy Kit'],['Twisted_ancestral_colour_kit.png','Twisted Kit'],['Metamorphic_dust.png','Metamorphic Dust']];
+const LAYOUT=[
+  ['ta','mo','ga','ze','tb','ba','zu','d2','cx','d2','tb','mo','ze','ta','ba','zu'],
+  ['tp','vd','cx','gr','d2','ze','co','dm','ga','ba','ax','ga','wt','mo','dm','ya'],
+  ['cb','gh','dk','mu','nx','wt','hy','sd','dk','ta','gr','cx','hy','vd','tp','ze'],
+  ['zu','ga','cx','ba','ax','mo','ta','vd','zu','sd','gh','cb','mu','co','d2','nx'],
+  ['tb','sk','wt','gh','ya','sd','ze','ga','tb','ab','ta','gr','wt','mo','rv','ga'],
+  ['hy','rv','cx','hk','d2','ax','ta','cs','if','gh','ze','mu','zu','cx','vd','cs'],
+  ['tp','cb','zu','ba','ab','mu','mo','dk','ax','tb','tp','nx','dk','sd','sk','ni'],
+  ['co','dm','nx','gr','ni','tb','if','ya','cb','hk','dm','d2','hy','ya','ba','co'],
+  ['zu','cx','d2','ga','ze','ta','ba','mo','cx','d2','ba','ta','ga','ze','zu','mo'],
+  ['gr','dm','ba','tb','zu','ga','gh','hy','sd','ze','gr','mu','vd','tb','cb','wt'],
+  ['wt','nx','mo','ze','cb','tp','co','mu','d2','ba','dm','cx','mo','ga','zu','co'],
+  ['d2','ax','sd','cx','dk','vd','rv','ax','tp','ya','hy','gh','dk','tb','ax','if'],
+  ['tb','hk','tp','d2','mo','ta','dm','ya','ga','ba','sd','ta','mo','cs','zu','nx'],
+  ['zu','if','tb','mu','ab','sd','ga','hy','gr','cb','hy','ni','gh','wt','ab','rv'],
+  ['ni','gh','ba','cb','nx','sk','ya','cs','dm','cx','sk','hk','tb','ze','vd','tp'],
+  ['dk','co','wt','ze','gr','vd','ta','cx','ax','mu','d2','dk','ya','ta','nx','co'],
+];
+function quadrantOf(r,c){return(r<8?0:2)+(c<8?0:1);}
+const FLAT = LAYOUT.flat();
+const TILE_ITEMS = FLAT.map((key,i)=>{
+  const r=Math.floor(i/16),c=i%16,q=quadrantOf(r,c);
+  return key==='sk'?SK_BY_Q[q]:key==='hk'?HK_BY_Q[q]:DEF[key];
+});
+
+const FLEET=[
+  {name:'Battleship',count:2,tiles:5,color:'#e0395a'},
+  {name:'Cruiser',count:4,tiles:4,color:'#a855f7'},
+  {name:'Destroyer',count:4,tiles:3,color:'#3b6fd6'},
+  {name:'Patrol Boat',count:3,tiles:2,color:'#38bdf8'},
+  {name:'L-Shape',count:2,tiles:4,color:'#4ade80'},
+  {name:'T-Shape',count:2,tiles:4,color:'#facc15'},
+  {name:'Plus',count:1,tiles:5,color:'#fb923c'},
+];
+
+let myShips = Array(256).fill(null);
+let selectedShip = FLEET[0].name;
+let boardLocked = false;
+let myShotsFired = Array(256).fill('');     // shots I've fired into Team B's waters
+let myIncomingShots = Array(256).fill('');  // shots Team B has landed on my fleet
+
+function shipColor(name){return FLEET.find(f=>f.name===name).color;}
+function shipTilesAllowed(name){const f=FLEET.find(f=>f.name===name);return f.tiles*f.count;}
+function shipTilesUsed(name){return myShips.filter(s=>s===name).length;}
+
+function buildShipList(){
+  const list=document.getElementById('ship-list');
+  list.innerHTML='';
+  FLEET.forEach(ship=>{
+    const row=document.createElement('div');
+    row.className='ship-row'+(ship.name===selectedShip?' selected':'');
+    row.innerHTML=`<div class="ship-swatch" style="background:${ship.color}"></div><span class="sname">${ship.name}</span><span class="scount">${shipTilesUsed(ship.name)}/${shipTilesAllowed(ship.name)}</span>`;
+    row.onclick=()=>{selectedShip=ship.name;buildShipList();};
+    list.appendChild(row);
+  });
+  const totalUsed=myShips.filter(Boolean).length;
+  const totalNeeded=FLEET.reduce((s,f)=>s+f.tiles*f.count,0);
+  document.getElementById('ship-progress').innerHTML=`<strong>${totalUsed}</strong> / ${totalNeeded} tiles placed`;
+}
+
+function renderFleetBoard(){
+  const colH=document.getElementById('fleet-col-headers'),grid=document.getElementById('fleet-grid');
+  colH.innerHTML='<div></div>';COLS.forEach(c=>colH.innerHTML+=`<div class="col-header">${c}</div>`);
+  grid.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    const rh=document.createElement('div');rh.className='row-header';rh.textContent=r+1;grid.appendChild(rh);
+    for(let c=0;c<16;c++){
+      const idx=r*16+c;
+      const cell=document.createElement('div');
+      cell.className='cell'+(boardLocked?' locked':'');
+      if(myShips[idx]){const col=shipColor(myShips[idx]);cell.style.borderColor=col;cell.style.boxShadow=`0 0 9px ${col}88`;cell.style.background=col+'22';}
+      cell.dataset.coord=`${COLS[c]}${r+1}`;
+      cell.dataset.shot=myIncomingShots[idx]||'';
+      const img=document.createElement('img');img.src=BASE+TILE_ITEMS[idx][0];img.onerror=function(){this.style.display='none';};cell.appendChild(img);
+      const ov=document.createElement('div');ov.className='overlay';cell.appendChild(ov);
+      cell.addEventListener('click',()=>placeShip(idx));
+      cell.addEventListener('mouseenter',e=>showTip(e,`${cell.dataset.coord} · ${TILE_ITEMS[idx][1]}${myShips[idx]?' · '+myShips[idx]:''}${myIncomingShots[idx]?' · enemy '+myIncomingShots[idx]:''}`));
+      cell.addEventListener('mouseleave',hideTip);
+      grid.appendChild(cell);
+    }
+  }
+  buildShipList();
+}
+
+function placeShip(idx){
+  if(boardLocked)return;
+  if(myShips[idx]===selectedShip){
+    myShips[idx]=null;
+    db.ref(TEAM_PATH+'/ships/'+idx).remove();
+  } else {
+    if(shipTilesUsed(selectedShip)>=shipTilesAllowed(selectedShip)){alert('All '+selectedShip+' tiles are already placed. Pick another ship or remove one first.');return;}
+    myShips[idx]=selectedShip;
+    db.ref(TEAM_PATH+'/ships/'+idx).set(selectedShip);
+  }
+  renderFleetBoard();
+}
+
+function renderFireBoard(){
+  const colH=document.getElementById('fire-col-headers'),grid=document.getElementById('fire-grid');
+  colH.innerHTML='<div></div>';COLS.forEach(c=>colH.innerHTML+=`<div class="col-header">${c}</div>`);
+  grid.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    const rh=document.createElement('div');rh.className='row-header';rh.textContent=r+1;grid.appendChild(rh);
+    for(let c=0;c<16;c++){
+      const idx=r*16+c;
+      const cell=document.createElement('div');
+      cell.className='cell';
+      cell.dataset.coord=`${COLS[c]}${r+1}`;
+      cell.dataset.shot=myShotsFired[idx]||'';
+      const img=document.createElement('img');img.src=BASE+TILE_ITEMS[idx][0];img.onerror=function(){this.style.display='none';};cell.appendChild(img);
+      const ov=document.createElement('div');ov.className='overlay';cell.appendChild(ov);
+      cell.addEventListener('click',()=>fireAt(idx));
+      cell.addEventListener('mouseenter',e=>showTip(e,`${cell.dataset.coord}${myShotsFired[idx]?' · '+myShotsFired[idx]:' · Click to fire'}`));
+      cell.addEventListener('mouseleave',hideTip);
+      grid.appendChild(cell);
+    }
+  }
+}
+
+async function fireAt(idx){
+  if(myShotsFired[idx])return;
+  const oppSnap = await db.ref(OPPONENT_PATH+'/ships/'+idx).once('value');
+  const result = oppSnap.exists() ? 'hit' : 'miss';
+  myShotsFired[idx]=result;
+  renderFireBoard();
+  await db.ref(OPPONENT_PATH+'/shotsReceived/'+idx).set(result);
+}
+
+function listenOpponentShots(){
+  db.ref(OPPONENT_PATH+'/shotsReceived').on('value', snap=>{
+    const data=snap.val()||{};
+    myShotsFired=Array(256).fill('');
+    Object.entries(data).forEach(([idx,val])=>{myShotsFired[idx]=val;});
+    renderFireBoard();
+  });
+}
+function listenIncomingShots(){
+  db.ref(TEAM_PATH+'/shotsReceived').on('value', snap=>{
+    const data=snap.val()||{};
+    myIncomingShots=Array(256).fill('');
+    Object.entries(data).forEach(([idx,val])=>{myIncomingShots[idx]=val;});
+    if(fleetUnlocked) renderFleetBoard();
+  });
+}
+
+async function loadMyShips(){
+  const snap = await db.ref(TEAM_PATH+'/ships').once('value');
+  const data = snap.val() || {};
+  myShips = Array(256).fill(null);
+  Object.entries(data).forEach(([idx,name])=>{myShips[idx]=name;});
+}
+
+function showTab(tab){
+  document.getElementById('view-fleet').style.display=tab==='fleet'?'block':'none';
+  document.getElementById('view-fire').style.display=tab==='fire'?'block':'none';
+  document.getElementById('tab-fleet').classList.toggle('active',tab==='fleet');
+  document.getElementById('tab-fire').classList.toggle('active',tab==='fire');
+}
+
+const tooltip=document.getElementById('tooltip');
+function showTip(e,text){tooltip.textContent=text;tooltip.style.opacity='1';moveTip(e);}
+function hideTip(){tooltip.style.opacity='0';}
+document.addEventListener('mousemove',moveTip);
+function moveTip(e){tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY+14)+'px';}
+
+async function init(){
+  await initPasswordHash();
+  await initTeamName();
+  await loadMyShips();
+  listenIncomingShots();
+  listenOpponentShots();
+  renderFireBoard();
+}
+init();
+</script>
+</body>
+</html>
