@@ -159,6 +159,9 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
       <button class="reset-link" onclick="resetBounties()">Reset Bounties</button>
       <button onclick="toggleFleetReveal()" id="fleet-reveal-btn">Show Full Fleets (Oversight)</button>
       <div class="legend-row" id="fleet-legend" style="display:none"></div>
+      <hr style="border-color:var(--border);margin:12px 0;">
+      <button onclick="toggleFleetLock()" id="fleet-lock-btn">Lock My Fleet Pages</button>
+      <button class="reset-link" onclick="resetEnemyWaters()">Reset Enemy Waters &amp; Log</button>
     </div>
   </div>
 </div>
@@ -425,6 +428,25 @@ db.ref('battleship/bounty/revealCount').on('value', snap=>{
   const btn=document.getElementById('reveal-next-btn');
   if(bountyRevealCount>=12){btn.textContent='All Bounties Revealed';btn.disabled=true;}
   else{btn.textContent=`Reveal Next Bounty (${bountyRevealCount}/12)`;btn.disabled=false;}
+});
+
+async function resetEnemyWaters(){
+  if(!confirm('This clears all fired shots and the audit log for both teams. This cannot be undone. Continue?')) return;
+  await db.ref('battleship/teams/teamA/shotsReceived').remove();
+  await db.ref('battleship/teams/teamB/shotsReceived').remove();
+  await db.ref('battleship/teams/teamA/log').remove();
+  await db.ref('battleship/teams/teamB/log').remove();
+}
+
+async function toggleFleetLock(){
+  const snap = await db.ref('battleship/phase/fleetLocked').once('value');
+  const current = snap.val() || false;
+  await db.ref('battleship/phase/fleetLocked').set(!current);
+}
+db.ref('battleship/phase/fleetLocked').on('value', snap=>{
+  const locked = snap.val() || false;
+  const btn=document.getElementById('fleet-lock-btn');
+  if(btn) btn.textContent = locked ? 'Unlock My Fleet Pages' : 'Lock My Fleet Pages';
 });
 
 async function init(){

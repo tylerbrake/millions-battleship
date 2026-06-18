@@ -50,14 +50,31 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
 .sidebar{flex-shrink:0;width:210px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 12px;}
 .sidebar h3{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.15em;color:var(--gold-dim);text-align:center;text-transform:uppercase;margin-bottom:8px;}
 .sdivider{height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:8px 0;}
-.ship-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:4px;cursor:pointer;font-size:.88rem;margin-bottom:3px;border:1px solid transparent;}
+.ship-row{display:flex;flex-direction:column;gap:2px;padding:7px 8px;border-radius:4px;cursor:pointer;margin-bottom:3px;border:1px solid transparent;}
 .ship-row:hover{background:#161a23;}
 .ship-row.selected{border-color:var(--gold);background:#1a1608;}
+.ship-row-top{display:flex;align-items:center;gap:8px;font-size:.88rem;}
 .ship-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid #0006;}
 .ship-row .sname{flex:1;color:var(--text);}
 .ship-row .scount{color:var(--text-dim);font-size:.78rem;}
+.ship-row .sspec{font-size:.7rem;color:var(--text-dim);padding-left:22px;}
 .progress{font-size:.8rem;color:var(--text-dim);text-align:center;margin-top:8px;}
 .progress strong{color:var(--gold);}
+
+.log-panel{flex-shrink:0;width:250px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 12px;}
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.log-header h3{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.12em;color:var(--gold-dim);text-transform:uppercase;}
+.log-header button{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.03em;padding:6px 10px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;white-space:nowrap;}
+.log-header button:hover{box-shadow:0 0 10px #c9a22744;}
+.log-header button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+.log-note{font-size:.62rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4;}
+.log-list{max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;}
+.log-entry{font-size:.76rem;padding:6px 8px;border-radius:3px;background:#0b0e15;display:flex;justify-content:space-between;gap:8px;color:var(--text-dim);}
+.log-entry.hit{color:#e8716b;}
+.log-entry.miss{color:#6fa8e0;}
+.log-entry.undo{color:var(--text-dim);font-style:italic;}
+.log-time{font-size:.64rem;color:var(--text-dim);flex-shrink:0;white-space:nowrap;}
+.log-empty{font-size:.74rem;color:var(--text-dim);text-align:center;padding:10px 0;}
 
 .board-glow-wrap{position:relative;}
 .board-glow-wrap::before{content:'';position:absolute;inset:-24px;background:radial-gradient(ellipse at center,#c9a2271a 0%,transparent 68%);border-radius:14px;pointer-events:none;animation:pulseGlow 4s ease-in-out infinite;}
@@ -90,21 +107,21 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
   <p>Millions Battleship Event</p>
 </header>
 
-<div class="tabs">
-  <button class="tab active" id="tab-fleet" onclick="showTab('fleet')">My Fleet</button>
-  <button class="tab" id="tab-fire" onclick="showTab('fire')">Enemy Waters</button>
+<div class="fleet-gate-card" id="page-gate">
+  <h2>🔒 Team B Access</h2>
+  <p>Enter the team password to continue.</p>
+  <input type="password" id="fleet-gate-input" placeholder="Password">
+  <button onclick="checkFleetPassword()">Enter</button>
+  <div class="gate-error" id="fleet-gate-error"></div>
 </div>
 
-<div id="view-fleet">
-  <div class="fleet-gate-card" id="fleet-gate">
-    <h2>🔒 My Fleet — Locked</h2>
-    <p>Enter the team captain password to place your fleet.</p>
-    <input type="password" id="fleet-gate-input" placeholder="Password">
-    <button onclick="checkFleetPassword()">Unlock</button>
-    <div class="gate-error" id="fleet-gate-error"></div>
+<div id="page-content" style="display:none">
+  <div class="tabs">
+    <button class="tab active" id="tab-fleet" onclick="showTab('fleet')">My Fleet</button>
+    <button class="tab" id="tab-fire" onclick="showTab('fire')">Enemy Waters</button>
   </div>
 
-  <div id="fleet-content" style="display:none">
+  <div id="view-fleet">
     <div class="team-settings">
       <div class="settings-row">
         <label>Team Name</label>
@@ -118,7 +135,7 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
       </div>
       <div class="settings-msg" id="settings-msg"></div>
     </div>
-    <div class="banner">Select a ship below, then click tiles to mark its position. Incoming enemy shots will appear here as they land.</div>
+    <div class="banner" id="fleet-banner">Select a ship below, then click tiles to mark its position. Incoming enemy shots will appear here as they land.</div>
     <div class="layout">
       <div class="sidebar">
         <h3>⚓ Fleet</h3>
@@ -134,15 +151,23 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
       </div>
     </div>
   </div>
-</div>
 
-<div id="view-fire" style="display:none">
-  <div class="banner">This is Team A's waters. Click a tile to fire — you won't know what's there until you do.</div>
-  <div class="layout">
-    <div class="board-glow-wrap">
-      <div class="board-wrap">
-        <div class="col-headers" id="fire-col-headers"></div>
-        <div class="grid" id="fire-grid"></div>
+  <div id="view-fire" style="display:none">
+    <div class="banner">This is Team A's waters. Click a tile to fire — you won't know what's there until you do.</div>
+    <div class="layout">
+      <div class="board-glow-wrap">
+        <div class="board-wrap">
+          <div class="col-headers" id="fire-col-headers"></div>
+          <div class="grid" id="fire-grid"></div>
+        </div>
+      </div>
+      <div class="log-panel">
+        <div class="log-header">
+          <h3>📜 Fire Log</h3>
+          <button id="undo-btn" onclick="undoLastShot()" disabled>↩ Undo Last Shot</button>
+        </div>
+        <div class="log-note">Undo only reverts shots fired from this browser this session.</div>
+        <div class="log-list" id="log-list"></div>
       </div>
     </div>
   </div>
@@ -220,9 +245,10 @@ async function checkFleetPassword(){
   const hash = await sha256(val);
   if(hash === TEAM_PASSWORD_HASH){
     fleetUnlocked = true;
-    document.getElementById('fleet-gate').style.display = 'none';
-    document.getElementById('fleet-content').style.display = 'block';
+    document.getElementById('page-gate').style.display = 'none';
+    document.getElementById('page-content').style.display = 'block';
     renderFleetBoard();
+    renderFireBoard();
   } else {
     document.getElementById('fleet-gate-error').textContent = 'Incorrect password.';
   }
@@ -325,6 +351,22 @@ let selectedShip = FLEET[0].name;
 let boardLocked = false;
 let myShotsFired = Array(256).fill('');     // shots I've fired into Team B's waters
 let myIncomingShots = Array(256).fill('');  // shots Team B has landed on my fleet
+let firedThisSession = [];                  // stack of idx fired this session, for Undo
+
+function coordOf(idx){const r=Math.floor(idx/16),c=idx%16;return `${COLS[c]}${r+1}`;}
+
+function listenFleetLock(){
+  db.ref('battleship/phase/fleetLocked').on('value', snap=>{
+    boardLocked = snap.val() || false;
+    const banner=document.getElementById('fleet-banner');
+    if(banner){
+      banner.textContent = boardLocked
+        ? '🔒 Fleet placement has been locked by the event admin. Ships can no longer be moved.'
+        : 'Select a ship below, then click tiles to mark its position. Incoming enemy shots will appear here as they land.';
+    }
+    if(fleetUnlocked) renderFleetBoard();
+  });
+}
 
 function shipColor(name){return FLEET.find(f=>f.name===name).color;}
 function shipTilesAllowed(name){const f=FLEET.find(f=>f.name===name);return f.tiles*f.count;}
@@ -336,7 +378,7 @@ function buildShipList(){
   FLEET.forEach(ship=>{
     const row=document.createElement('div');
     row.className='ship-row'+(ship.name===selectedShip?' selected':'');
-    row.innerHTML=`<div class="ship-swatch" style="background:${ship.color}"></div><span class="sname">${ship.name}</span><span class="scount">${shipTilesUsed(ship.name)}/${shipTilesAllowed(ship.name)}</span>`;
+    row.innerHTML=`<div class="ship-row-top"><div class="ship-swatch" style="background:${ship.color}"></div><span class="sname">${ship.name}</span><span class="scount">${shipTilesUsed(ship.name)}/${shipTilesAllowed(ship.name)}</span></div><div class="sspec">${ship.tiles} tiles × ${ship.count} ships</div>`;
     row.onclick=()=>{selectedShip=ship.name;buildShipList();};
     list.appendChild(row);
   });
@@ -410,7 +452,53 @@ async function fireAt(idx){
   const result = oppSnap.exists() ? 'hit' : 'miss';
   myShotsFired[idx]=result;
   renderFireBoard();
+  const coord=coordOf(idx);
   await db.ref(OPPONENT_PATH+'/shotsReceived/'+idx).set(result);
+  await db.ref(OPPONENT_PATH+'/log').push({type:'fire', coord, result, time:Date.now()});
+  firedThisSession.push(idx);
+  updateUndoButton();
+}
+
+async function undoLastShot(){
+  if(firedThisSession.length===0)return;
+  const idx=firedThisSession.pop();
+  myShotsFired[idx]='';
+  renderFireBoard();
+  const coord=coordOf(idx);
+  await db.ref(OPPONENT_PATH+'/shotsReceived/'+idx).remove();
+  await db.ref(OPPONENT_PATH+'/log').push({type:'undo', coord, time:Date.now()});
+  updateUndoButton();
+}
+function updateUndoButton(){
+  const btn=document.getElementById('undo-btn');
+  if(btn) btn.disabled = firedThisSession.length===0;
+}
+
+function listenLog(){
+  db.ref(OPPONENT_PATH+'/log').on('value', snap=>{
+    const entries=[];
+    snap.forEach(child=>entries.push(child.val()));
+    renderLog(entries);
+  });
+}
+function renderLog(entries){
+  const list=document.getElementById('log-list');
+  if(!list) return;
+  if(entries.length===0){ list.innerHTML='<div class="log-empty">No shots fired yet.</div>'; return; }
+  list.innerHTML='';
+  entries.slice().reverse().forEach(e=>{
+    const div=document.createElement('div');
+    const timeStr=new Date(e.time).toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+    if(e.type==='undo'){
+      div.className='log-entry undo';
+      div.innerHTML=`<span>↩ Undid shot at ${e.coord}</span><span class="log-time">${timeStr}</span>`;
+    } else {
+      div.className='log-entry '+e.result;
+      const icon=e.result==='hit'?'💥':'💨';
+      div.innerHTML=`<span>${icon} ${e.coord} — ${e.result.toUpperCase()}</span><span class="log-time">${timeStr}</span>`;
+    }
+    list.appendChild(div);
+  });
 }
 
 function listenOpponentShots(){
@@ -456,6 +544,8 @@ async function init(){
   await loadMyShips();
   listenIncomingShots();
   listenOpponentShots();
+  listenFleetLock();
+  listenLog();
   renderFireBoard();
 }
 init();
