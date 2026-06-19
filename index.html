@@ -76,16 +76,17 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
 .cell[data-shot="miss"] .overlay::after{content:"💨";}
 .tooltip{position:fixed;background:#12141c;border:1px solid var(--gold-dim);border-radius:4px;padding:6px 12px;font-size:.95rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:260px;line-height:1.5;}
 
-.admin-section{width:100%;max-width:420px;margin:30px auto 0;text-align:center;}
+.admin-section{width:100%;max-width:680px;margin:30px auto 0;text-align:center;}
 .admin-toggle{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.05em;color:#2a2e38;background:none;border:1px solid #1a1d24;border-radius:4px;padding:6px 14px;cursor:pointer;transition:all .3s;}
 .admin-toggle:hover{border-color:var(--border);color:var(--text-dim);}
-.admin-panel{display:none;margin-top:14px;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:16px;}
+.admin-panel{display:none;margin-top:14px;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:16px;text-align:left;}
 .admin-panel input{width:100%;background:#0b0e15;border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:'IM Fell English',serif;margin-bottom:8px;outline:none;}
+.admin-locked{text-align:center;}
 .admin-panel button{font-family:'Cinzel',serif;font-size:.92rem;letter-spacing:.06em;padding:7px 14px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;margin:3px;}
 .admin-panel button.reset-link{font-size:.82rem;border-color:var(--border);background:none;color:var(--text-dim);}
 .admin-panel button.reset-link:hover{color:#d06060;border-color:#6a1515;}
-.admin-error{color:#d06060;font-size:.9rem;min-height:14px;}
-.admin-controls{display:none;}
+.admin-error{color:#d06060;font-size:.9rem;min-height:14px;text-align:center;}
+.admin-controls{display:none;text-align:center;}
 .admin-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:12px 0;}
 .admin-pw-row{display:flex;gap:8px;margin-top:4px;}
 .admin-pw-row input{margin-bottom:0;}
@@ -93,6 +94,19 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
 .legend-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:.82rem;color:var(--text-dim);}
 .legend-item{display:flex;align-items:center;gap:4px;}
 .legend-swatch{width:11px;height:11px;border-radius:2px;}
+
+.admin-logs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.admin-log-col{flex:1;min-width:220px;max-width:300px;}
+.admin-log-col h4{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;text-align:center;margin-bottom:8px;}
+.admin-log-col.a h4{color:var(--teamA);}
+.admin-log-col.b h4{color:var(--teamB);}
+.admin-log-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;background:#0b0e15;border:1px solid var(--border);border-radius:6px;padding:8px;}
+.admin-log-entry{font-size:.78rem;padding:6px 8px;border-radius:3px;display:flex;justify-content:space-between;gap:8px;color:var(--text-dim);}
+.admin-log-entry.hit{color:#e8716b;}
+.admin-log-entry.miss{color:#6fa8e0;}
+.admin-log-entry.undo{color:var(--text-dim);font-style:italic;}
+.admin-log-time{font-size:.66rem;color:var(--text-dim);flex-shrink:0;white-space:nowrap;}
+.admin-log-empty{font-size:.78rem;color:var(--text-dim);text-align:center;padding:10px 0;}
 </style>
 </head>
 <body>
@@ -177,6 +191,18 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
         <button onclick="changeAdminPassword()">Save</button>
       </div>
       <div class="admin-pw-msg" id="admin-pw-msg"></div>
+      <div class="admin-divider"></div>
+      <div style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold-dim);text-align:left;margin-bottom:8px;letter-spacing:.08em;">FIRE LOGS</div>
+      <div class="admin-logs">
+        <div class="admin-log-col a">
+          <h4>⚓ Team A's Log <span style="color:var(--text-dim);font-weight:normal;font-size:.7rem;">(shots fired at Team A)</span></h4>
+          <div class="admin-log-list" id="admin-log-a"></div>
+        </div>
+        <div class="admin-log-col b">
+          <h4>⚓ Team B's Log <span style="color:var(--text-dim);font-weight:normal;font-size:.7rem;">(shots fired at Team B)</span></h4>
+          <div class="admin-log-list" id="admin-log-b"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -475,11 +501,53 @@ db.ref('battleship/phase/fleetLocked').on('value', snap=>{
   if(btn) btn.textContent = locked ? 'Unlock My Fleet Pages' : 'Lock My Fleet Pages';
 });
 
+let adminLogA = [], adminLogB = [];
+
+function listenAdminLogs(){
+  db.ref('battleship/teams/teamA/log').on('child_added', snap=>{
+    adminLogA.push(snap.val());
+    renderAdminLog('a', adminLogA);
+  });
+  db.ref('battleship/teams/teamA/log').on('child_removed', ()=>{
+    adminLogA = [];
+    renderAdminLog('a', adminLogA);
+  });
+  db.ref('battleship/teams/teamB/log').on('child_added', snap=>{
+    adminLogB.push(snap.val());
+    renderAdminLog('b', adminLogB);
+  });
+  db.ref('battleship/teams/teamB/log').on('child_removed', ()=>{
+    adminLogB = [];
+    renderAdminLog('b', adminLogB);
+  });
+}
+
+function renderAdminLog(prefix, entries){
+  const list=document.getElementById('admin-log-'+prefix);
+  if(!list) return;
+  if(entries.length===0){ list.innerHTML='<div class="admin-log-empty">No shots fired yet.</div>'; return; }
+  list.innerHTML='';
+  entries.slice().reverse().forEach(e=>{
+    const div=document.createElement('div');
+    const timeStr=new Date(e.time).toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+    if(e.type==='undo'){
+      div.className='admin-log-entry undo';
+      div.innerHTML=`<span>↩ Undid shot at ${e.coord}</span><span class="admin-log-time">${timeStr}</span>`;
+    } else {
+      div.className='admin-log-entry '+e.result;
+      const icon=e.result==='hit'?'💥':'💨';
+      div.innerHTML=`<span>${icon} ${e.coord} — ${e.result.toUpperCase()}</span><span class="admin-log-time">${timeStr}</span>`;
+    }
+    list.appendChild(div);
+  });
+}
+
 async function init(){
   await initAdminHash();
   buildFleetInfographic();
   listenTeam('a', 'battleship/teams/teamA');
   listenTeam('b', 'battleship/teams/teamB');
+  listenAdminLogs();
   renderAll();
 }
 init();
