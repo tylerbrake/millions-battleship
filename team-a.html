@@ -474,11 +474,18 @@ function updateUndoButton(){
   if(btn) btn.disabled = firedThisSession.length===0;
 }
 
+let logEntries = [];
+
 function listenLog(){
-  db.ref(OPPONENT_PATH+'/log').on('value', snap=>{
-    const entries=[];
-    snap.forEach(child=>entries.push(child.val()));
-    renderLog(entries);
+  logEntries = [];
+  db.ref(OPPONENT_PATH+'/log').on('child_added', snap=>{
+    logEntries.push(snap.val());
+    renderLog(logEntries);
+  });
+  // Also listen for removals (reset) so the log clears
+  db.ref(OPPONENT_PATH+'/log').on('child_removed', ()=>{
+    logEntries = [];
+    renderLog(logEntries);
   });
 }
 function renderLog(entries){
