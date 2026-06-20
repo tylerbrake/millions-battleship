@@ -95,6 +95,10 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
 .legend-item{display:flex;align-items:center;gap:4px;}
 .legend-swatch{width:11px;height:11px;border-radius:2px;}
 
+.public-logs-section{width:100%;max-width:680px;margin:18px auto 28px;position:relative;z-index:1;}
+.public-logs-label{font-family:'Cinzel',serif;font-size:.9rem;letter-spacing:.16em;color:var(--gold-dim);text-transform:uppercase;text-align:center;margin-bottom:10px;}
+.log-subnote{color:var(--text-dim);font-weight:normal;font-size:.68rem;}
+
 .admin-logs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
 .admin-log-col{flex:1;min-width:220px;max-width:300px;}
 .admin-log-col h4{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;text-align:center;margin-bottom:8px;}
@@ -144,6 +148,20 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
   </div>
 </div>
 
+<div class="public-logs-section">
+  <div class="public-logs-label">📜 Fire Logs</div>
+  <div class="admin-logs">
+    <div class="admin-log-col a">
+      <h4>⚓ Team A's Log <span class="log-subnote">(shots fired at Team A)</span></h4>
+      <div class="admin-log-list" id="admin-log-a"></div>
+    </div>
+    <div class="admin-log-col b">
+      <h4>⚓ Team B's Log <span class="log-subnote">(shots fired at Team B)</span></h4>
+      <div class="admin-log-list" id="admin-log-b"></div>
+    </div>
+  </div>
+</div>
+
 <div class="info-row">
   <div class="info-card fleet-card">
     <h3>⚓ Fleet</h3>
@@ -159,7 +177,7 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
       <div class="rh">SINKING</div>
       Hit every tile a ship occupies to sink it.
       <div class="rh">PLACEMENT</div>
-      Ships cannot touch each other, even diagonally. Tetris ships keep their shape but can be rotated freely.
+      Ships cannot touch each other, except diagonally. Tetris ships keep their shape but can be rotated and mirrored freely.
       <div class="rh">BOUNTY</div>
       Revealed bounty tiles award +1 bonus hit to the first team to land on them.
       <div class="rh">WINNING</div>
@@ -191,18 +209,6 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
         <button onclick="changeAdminPassword()">Save</button>
       </div>
       <div class="admin-pw-msg" id="admin-pw-msg"></div>
-      <div class="admin-divider"></div>
-      <div style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold-dim);text-align:left;margin-bottom:8px;letter-spacing:.08em;">FIRE LOGS</div>
-      <div class="admin-logs">
-        <div class="admin-log-col a">
-          <h4>⚓ Team A's Log <span style="color:var(--text-dim);font-weight:normal;font-size:.7rem;">(shots fired at Team A)</span></h4>
-          <div class="admin-log-list" id="admin-log-a"></div>
-        </div>
-        <div class="admin-log-col b">
-          <h4>⚓ Team B's Log <span style="color:var(--text-dim);font-weight:normal;font-size:.7rem;">(shots fired at Team B)</span></h4>
-          <div class="admin-log-list" id="admin-log-b"></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
