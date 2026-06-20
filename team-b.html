@@ -452,11 +452,12 @@ function renderFireBoard(){
 async function fireAt(idx){
   if(!fleetUnlocked)return;
   if(myShotsFired[idx])return;
+  const coord=coordOf(idx);
+  if(!confirm(`Fire a shot at ${coord}? This will be recorded in the public fire log immediately — even if you use Undo afterward, the undo action will also show in the log.`)) return;
   const oppSnap = await db.ref(OPPONENT_PATH+'/ships/'+idx).once('value');
   const result = oppSnap.exists() ? 'hit' : 'miss';
   myShotsFired[idx]=result;
   renderFireBoard();
-  const coord=coordOf(idx);
   await db.ref(OPPONENT_PATH+'/shotsReceived/'+idx).set(result);
   await db.ref(OPPONENT_PATH+'/log').push({type:'fire', coord, result, time:Date.now()});
   firedThisSession.push(idx);
