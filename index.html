@@ -361,10 +361,13 @@ async function initAdminHash(){
   if(snap.exists()){ ADMIN_PASSWORD_HASH = snap.val(); }
   else { ADMIN_PASSWORD_HASH = await sha256('millionsadmin'); await db.ref('battleship/admin/passwordHash').set(ADMIN_PASSWORD_HASH); }
 }
+let isAdminAuthenticated = false;
+
 async function checkAdmin(){
   const val=document.getElementById('admin-input').value;
   const hash=await sha256(val);
   if(hash===ADMIN_PASSWORD_HASH){
+    isAdminAuthenticated = true;
     document.getElementById('admin-locked').style.display='none';
     document.getElementById('admin-controls').style.display='block';
   } else {
@@ -384,10 +387,12 @@ function buildBountyRow(){
   }
 }
 async function revealNextBounty(){
+  if(!isAdminAuthenticated) return;
   if(bountyRevealCount>=12) return;
   await db.ref('battleship/bounty/revealCount').set(bountyRevealCount+1);
 }
 async function resetBounties(){
+  if(!isAdminAuthenticated) return;
   await db.ref('battleship/bounty/revealCount').set(0);
 }
 
@@ -445,6 +450,7 @@ function toggleAdminPanel(){
   panel.style.display = panel.style.display==='block' ? 'none' : 'block';
 }
 function toggleFleetReveal(){
+  if(!isAdminAuthenticated) return;
   fleetRevealed=!fleetRevealed;
   document.getElementById('fleet-reveal-btn').textContent = fleetRevealed ? 'Hide Full Fleets' : 'Show Full Fleets (Oversight)';
   document.getElementById('fleet-legend').style.display = fleetRevealed ? 'flex' : 'none';
@@ -478,6 +484,7 @@ db.ref('battleship/bounty/revealCount').on('value', snap=>{
 });
 
 async function changeAdminPassword(){
+  if(!isAdminAuthenticated) return;
   const val = document.getElementById('new-admin-pw').value;
   if(!val){ document.getElementById('admin-pw-msg').textContent='Please enter a new password.'; return; }
   ADMIN_PASSWORD_HASH = await sha256(val);
@@ -489,6 +496,7 @@ async function changeAdminPassword(){
 }
 
 async function resetEnemyWaters(){
+  if(!isAdminAuthenticated) return;
   if(!confirm('This clears all fired shots and the audit log for both teams. This cannot be undone. Continue?')) return;
   await db.ref('battleship/teams/teamA/shotsReceived').remove();
   await db.ref('battleship/teams/teamB/shotsReceived').remove();
@@ -497,6 +505,7 @@ async function resetEnemyWaters(){
 }
 
 async function toggleFleetLock(){
+  if(!isAdminAuthenticated) return;
   const snap = await db.ref('battleship/phase/fleetLocked').once('value');
   const current = snap.val() || false;
   await db.ref('battleship/phase/fleetLocked').set(!current);
