@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Millions – Battleship Live Board</title>
+<title>Millions – Battleship</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=IM+Fell+English&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -15,71 +15,65 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'IM Fell English',serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 10px 48px;overflow-x:hidden;}
 #particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
-header,.info-row,.bounty-section,.teams-wrap,.public-logs-section{position:relative;z-index:1;}
+header,.gate-wrap,main{position:relative;z-index:1;}
 header{text-align:center;padding:28px 0 8px;}
-header h1{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4.5vw,2.7rem);font-weight:900;letter-spacing:.13em;color:var(--gold);text-shadow:0 0 35px #c9a22777,0 0 80px #c9a22733,0 2px 0 #000;animation:titlePulse 5s ease-in-out infinite;}
-@keyframes titlePulse{0%,100%{text-shadow:0 0 28px #c9a22766,0 0 60px #c9a22722,0 2px 0 #000;}50%{text-shadow:0 0 50px #c9a227aa,0 0 100px #c9a22755,0 2px 0 #000;}}
-header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08em;}
-.drops-link{display:inline-block;margin-top:10px;font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold-dim);text-decoration:none;border:1px solid var(--border);border-radius:4px;padding:6px 14px;}
-.drops-link:hover{border-color:var(--gold-dim);color:var(--gold);}
+header h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;letter-spacing:.13em;color:var(--gold);text-shadow:0 0 30px #c9a22766,0 0 70px #c9a22733,0 2px 0 #000;}
+header p{font-size:.9rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08em;}
 .conn-status{position:fixed;top:8px;right:10px;font-size:.7rem;color:var(--text-dim);z-index:50;}
 .conn-status.ok{color:#4ade80;}
 .conn-status.err{color:#d06060;}
 
-.info-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;max-width:960px;margin:6px auto 22px;}
-.info-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
-.info-card h3{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.12em;color:var(--gold-dim);text-align:center;text-transform:uppercase;margin-bottom:8px;}
-.fleet-card{max-width:580px;}
-.sub-note{font-size:.85rem;color:var(--text-dim);text-align:center;margin-bottom:10px;line-height:1.45;}
-.fleet-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
-.ship-entry{display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;}
-.ship-entry .sname{font-family:'Cinzel',serif;font-size:.8rem;color:var(--gold);text-align:center;letter-spacing:.03em;}
-.ship-entry .scount{font-size:.75rem;color:var(--text-dim);}
-.tetris-grid{display:grid;gap:2px;margin:2px 0;}
-.tc{width:13px;height:13px;border-radius:2px;}
-.tc.off{background:transparent;}
-.ship-note{font-size:.7rem;color:var(--text-dim);text-align:center;}
-.fleet-total{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold);text-align:center;margin-top:10px;}
-.rules-card{max-width:320px;}
-.rules-block{font-size:.9rem;color:var(--text-dim);line-height:1.75;}
-.rules-block .rh{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);margin:6px 0 2px;}
+.gate-wrap{max-width:340px;margin:40px auto;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:30px 32px;text-align:center;}
+.gate-wrap h2{font-family:'Cinzel',serif;color:var(--gold);font-size:1.1rem;margin-bottom:8px;}
+.gate-wrap p{font-size:.85rem;color:var(--text-dim);margin-bottom:16px;}
+.gate-wrap input{width:100%;background:#0b0e15;border:1px solid var(--border);border-radius:4px;padding:9px 12px;color:var(--text);font-family:'IM Fell English',serif;margin-bottom:10px;outline:none;}
+.gate-wrap input:focus{border-color:var(--gold-dim);}
+.gate-wrap button{width:100%;font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.08em;padding:9px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;}
+.gate-wrap button:hover{box-shadow:0 0 14px #c9a22744;}
+.gate-error{color:#d06060;font-size:.8rem;margin-top:8px;min-height:14px;}
+
+main{display:none;width:100%;}
+
+.controls-panel{max-width:680px;margin:0 auto 24px;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:18px;text-align:center;}
+.controls-panel h3{font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.1em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:12px;}
+.controls-panel button{font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.06em;padding:8px 16px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;margin:4px;}
+.controls-panel button.reset-link{font-size:.78rem;border-color:var(--border);background:none;color:var(--text-dim);}
+.controls-panel button.reset-link:hover{color:#d06060;border-color:#6a1515;}
+.controls-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:14px 0;}
+.pw-row{display:flex;gap:8px;max-width:380px;margin:6px auto 0;}
+.pw-row input{flex:1;background:#0b0e15;border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:'IM Fell English',serif;outline:none;}
+.pw-msg{font-size:.8rem;color:var(--gold);min-height:16px;margin-top:6px;}
+.legend-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:.78rem;color:var(--text-dim);}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-swatch{width:11px;height:11px;border-radius:2px;}
 
 .bounty-section{width:100%;max-width:760px;margin:0 auto 22px;text-align:center;}
 .bounty-label{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.18em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:8px;}
-.bounty-label span{color:var(--gold);font-size:.88rem;display:block;letter-spacing:.1em;margin-top:2px;opacity:.8;text-transform:none;}
 .bounty-row{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;}
-.bounty-tile{width:46px;height:46px;border-radius:4px;border:2px solid var(--gold-dim);background:#0d1017;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold-dim);transition:all .3s;}
-.bounty-tile.revealed{border-color:var(--gold);box-shadow:0 0 14px #c9a22766;color:var(--gold);animation:bountyPop .4s ease-out;}
-@keyframes bountyPop{0%{transform:scale(0.7);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+.bounty-tile{width:42px;height:42px;border-radius:4px;border:2px solid var(--gold-dim);background:#0d1017;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold-dim);}
+.bounty-tile.revealed{border-color:var(--gold);box-shadow:0 0 14px #c9a22766;color:var(--gold);}
 
 .teams-wrap{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
-.board-glow-wrap{position:relative;}
-.board-glow-wrap::before{content:'';position:absolute;inset:-18px;background:radial-gradient(ellipse at center,#c9a2271a 0%,transparent 68%);border-radius:14px;pointer-events:none;animation:pulseGlow 4s ease-in-out infinite;}
-@keyframes pulseGlow{0%,100%{opacity:.5;}50%{opacity:1;}}
-.team-board{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;}
-.team-board h2{font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:.1em;text-align:center;margin-bottom:10px;}
+.team-board{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.team-board h2{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:.1em;text-align:center;margin-bottom:10px;}
 .team-board.a h2{color:var(--teamA);}
 .team-board.b h2{color:var(--teamB);}
-.stat-line{font-size:.95rem;color:var(--text-dim);text-align:center;margin-bottom:10px;}
+.stat-line{font-size:.88rem;color:var(--text-dim);text-align:center;margin-bottom:10px;}
 .stat-line strong{color:var(--gold);}
 .col-headers,.grid{display:grid;grid-template-columns:20px repeat(16,var(--cell));gap:2px;}
 .col-headers{margin-bottom:2px;}
-.col-header,.row-header{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--gold-dim);display:flex;align-items:center;justify-content:center;}
-.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;border:2px solid #252830;background:#0b0e15;cursor:pointer;transition:transform .12s,box-shadow .2s,border-color .2s;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.cell:hover{transform:scale(1.16);z-index:10;box-shadow:0 0 14px #c9a22755;}
+.col-header,.row-header{font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;color:var(--gold-dim);display:flex;align-items:center;justify-content:center;}
+.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;border:2px solid #252830;background:#0b0e15;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .cell img{width:27px;height:27px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 1px 3px rgba(0,0,0,1));}
+.cell.ship-revealed{box-shadow:0 0 8px currentColor;}
 .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;opacity:0;border-radius:1px;}
 .cell[data-shot="hit"] .overlay{background:var(--hit);opacity:1;}
 .cell[data-shot="miss"] .overlay{background:var(--miss);opacity:1;}
 .cell[data-shot="hit"] .overlay::after{content:"💥";}
 .cell[data-shot="miss"] .overlay::after{content:"💨";}
-.tooltip{position:fixed;background:#12141c;border:1px solid var(--gold-dim);border-radius:4px;padding:6px 12px;font-size:.95rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:260px;line-height:1.5;}
+.tooltip{position:fixed;background:#12141c;border:1px solid var(--gold-dim);border-radius:4px;padding:6px 12px;font-size:.9rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:260px;line-height:1.5;}
 
-.public-logs-section{width:100%;max-width:680px;margin:18px auto 28px;position:relative;z-index:1;}
-.public-logs-label{font-family:'Cinzel',serif;font-size:.9rem;letter-spacing:.16em;color:var(--gold-dim);text-transform:uppercase;text-align:center;margin-bottom:10px;}
-.log-subnote{color:var(--text-dim);font-weight:normal;font-size:.68rem;}
-
-.admin-logs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.admin-logs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:24px;max-width:680px;margin-left:auto;margin-right:auto;}
 .admin-log-col{flex:1;min-width:220px;max-width:300px;}
 .admin-log-col h4{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;text-align:center;margin-bottom:8px;}
 .admin-log-col.a h4{color:var(--teamA);}
@@ -98,26 +92,48 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
 <div class="conn-status" id="conn-status">Connecting…</div>
 
 <header>
-  <h1>⚔ MILLIONS BATTLESHIP — LIVE ⚔</h1>
-  <p>Spectator Board</p>
-  <a class="drops-link" href="drops.html">📋 View Drop Reference →</a>
+  <h1>⚓ MILLIONS BATTLESHIP ⚓</h1>
+  <p>Fleet Command</p>
 </header>
 
-<div class="bounty-section">
-  <div class="bounty-label">Bounty Tiles<span>First team to hit a revealed bounty tile earns +1 bonus hit</span></div>
-  <div class="bounty-row" id="bounty-row"></div>
+<div class="gate-wrap" id="gate-wrap">
+  <h2>🔒 Access Required</h2>
+  <p>Enter the password to continue.</p>
+  <input type="password" id="gate-input" placeholder="Password">
+  <button onclick="checkAccess()">Enter</button>
+  <div class="gate-error" id="gate-error"></div>
 </div>
 
-<div class="teams-wrap">
-  <div class="board-glow-wrap">
+<main id="main-content">
+  <div class="controls-panel">
+    <h3>Event Controls</h3>
+    <button onclick="revealNextBounty()" id="reveal-next-btn">Reveal Next Bounty (0/12)</button>
+    <button class="reset-link" onclick="resetBounties()">Reset Bounties</button>
+    <br>
+    <button onclick="toggleFleetLock()" id="fleet-lock-btn">Lock My Fleet Pages</button>
+    <button class="reset-link" onclick="resetEnemyWaters()">Reset Enemy Waters &amp; Log</button>
+    <div class="legend-row" id="fleet-legend"></div>
+    <div class="controls-divider"></div>
+    <div style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold-dim);letter-spacing:.08em;">CHANGE PASSWORD</div>
+    <div class="pw-row">
+      <input type="password" id="new-admin-pw" placeholder="New password">
+      <button onclick="changeAdminPassword()">Save</button>
+    </div>
+    <div class="pw-msg" id="admin-pw-msg"></div>
+  </div>
+
+  <div class="bounty-section">
+    <div class="bounty-label">Bounty Tiles</div>
+    <div class="bounty-row" id="bounty-row"></div>
+  </div>
+
+  <div class="teams-wrap">
     <div class="team-board a">
       <h2 id="team-a-header">⚓ Team A</h2>
       <div class="stat-line">Hits taken: <strong id="a-hits">0</strong> / Misses: <strong id="a-misses">0</strong></div>
       <div class="col-headers" id="a-col-headers"></div>
       <div class="grid" id="a-grid"></div>
     </div>
-  </div>
-  <div class="board-glow-wrap">
     <div class="team-board b">
       <h2 id="team-b-header">⚓ Team B</h2>
       <div class="stat-line">Hits taken: <strong id="b-hits">0</strong> / Misses: <strong id="b-misses">0</strong></div>
@@ -125,52 +141,24 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
       <div class="grid" id="b-grid"></div>
     </div>
   </div>
-</div>
 
-<div class="public-logs-section">
-  <div class="public-logs-label">📜 Fire Logs</div>
   <div class="admin-logs">
     <div class="admin-log-col a">
-      <h4>⚓ Team A's Log <span class="log-subnote">(shots fired at Team A)</span></h4>
+      <h4>⚓ Team A's Log</h4>
       <div class="admin-log-list" id="admin-log-a"></div>
     </div>
     <div class="admin-log-col b">
-      <h4>⚓ Team B's Log <span class="log-subnote">(shots fired at Team B)</span></h4>
+      <h4>⚓ Team B's Log</h4>
       <div class="admin-log-list" id="admin-log-b"></div>
     </div>
   </div>
-</div>
-
-<div class="info-row">
-  <div class="info-card fleet-card">
-    <h3>⚓ Fleet</h3>
-    <div class="sub-note">Ships may be placed horizontally or vertically. Tetris ships may also be rotated.</div>
-    <div class="fleet-row" id="fleet-list"></div>
-    <div class="fleet-total" id="fleet-total"></div>
-  </div>
-  <div class="info-card rules-card">
-    <h3>📋 Rules</h3>
-    <div class="rules-block">
-      <div class="rh">CALLING A TILE</div>
-      Call a coordinate (e.g. G7). Hit 💥 if it's a ship tile, Miss 💨 if not.
-      <div class="rh">SINKING</div>
-      Hit every tile a ship occupies to sink it.
-      <div class="rh">PLACEMENT</div>
-      Ships cannot touch each other, except diagonally. Tetris ships keep their shape but can be rotated and mirrored freely.
-      <div class="rh">BOUNTY</div>
-      Revealed bounty tiles award +1 bonus hit to the first team to land on them.
-      <div class="rh">WINNING</div>
-      First team to sink all opponent ships wins.
-    </div>
-  </div>
-</div>
+</main>
 
 <div id="tooltip" class="tooltip"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-// ── Particles (matches original board) ──────────────────────
 (function(){
   const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
   let W,H,P=[];const N=110;
@@ -195,7 +183,6 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
   }draw();
 })();
 
-// ── Firebase ──────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyAEE9_TrWUImNIBq0Z7p0i57EMeVu-V4F4",
   authDomain: "battleship-board.firebaseapp.com",
@@ -213,6 +200,12 @@ db.ref('.info/connected').on('value', snap=>{
   if(snap.val()===true){el.textContent='● Live';el.className='conn-status ok';}
   else{el.textContent='● Reconnecting…';el.className='conn-status err';}
 });
+
+async function sha256(text){
+  const enc=new TextEncoder().encode(text);
+  const buf=await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
 const ROWS = 16;
@@ -261,47 +254,31 @@ const SHIP_COLORS = {
   'Battleship':'#e0395a','Cruiser':'#a855f7','Destroyer':'#3b6fd6','Patrol Boat':'#38bdf8',
   'L-Shape':'#4ade80','T-Shape':'#facc15','Plus':'#fb923c'
 };
-const FLEET=[
-  {name:'Battleship',count:2,tiles:5,grid:[[1,1,1,1,1]],note:'5 tiles'},
-  {name:'Cruiser',count:4,tiles:4,grid:[[1,1,1,1]],note:'4 tiles'},
-  {name:'Destroyer',count:4,tiles:3,grid:[[1,1,1]],note:'3 tiles'},
-  {name:'Patrol Boat',count:3,tiles:2,grid:[[1,1]],note:'2 tiles'},
-  {name:'L-Shape',count:2,tiles:4,grid:[[1,1],[1,0],[1,0]],note:'4 tiles · rotatable'},
-  {name:'T-Shape',count:2,tiles:4,grid:[[1,1,1],[0,1,0]],note:'4 tiles · rotatable'},
-  {name:'Plus',count:1,tiles:5,grid:[[0,1,0],[1,1,1],[0,1,0]],note:'5 tiles · rotatable'},
-];
 
-function buildFleetInfographic(){
-  const container=document.getElementById('fleet-list');
-  container.innerHTML='';
-  FLEET.forEach(ship=>{
-    const color=SHIP_COLORS[ship.name];
-    const entry=document.createElement('div');entry.className='ship-entry';
-    const nm=document.createElement('div');nm.className='sname';nm.textContent=ship.name;
-    const ct=document.createElement('div');ct.className='scount';ct.textContent=`×${ship.count}`;
-    const rows=ship.grid.length,cols=Math.max(...ship.grid.map(r=>r.length));
-    const tg=document.createElement('div');tg.className='tetris-grid';
-    tg.style.gridTemplateColumns=`repeat(${cols},12px)`;tg.style.gridTemplateRows=`repeat(${rows},12px)`;
-    ship.grid.forEach(row=>row.forEach(cell=>{
-      const c=document.createElement('div');
-      c.className='tc'+(cell?'':' off');
-      if(cell){c.style.background=color+'cc';c.style.border='1px solid '+color;}
-      tg.appendChild(c);
-    }));
-    const note=document.createElement('div');note.className='ship-note';note.textContent=ship.note;
-    entry.appendChild(nm);entry.appendChild(ct);entry.appendChild(tg);entry.appendChild(note);
-    container.appendChild(entry);
-  });
-  const totalTiles=FLEET.reduce((s,f)=>s+f.tiles*f.count,0);
-  const totalShips=FLEET.reduce((s,f)=>s+f.count,0);
-  document.getElementById('fleet-total').textContent=`${totalShips} ships · ${totalTiles} tiles`;
+let TEAM_A_SHIPS={}, TEAM_B_SHIPS={}, TEAM_A_SHOTS={}, TEAM_B_SHOTS={};
+let bountyRevealCount = 0;
+let ADMIN_PASSWORD_HASH = null;
+let isAuthenticated = false;
+
+async function initAdminHash(){
+  const snap = await db.ref('battleship/admin/passwordHash').once('value');
+  if(snap.exists()){ ADMIN_PASSWORD_HASH = snap.val(); }
+  else { ADMIN_PASSWORD_HASH = await sha256('millionsadmin'); await db.ref('battleship/admin/passwordHash').set(ADMIN_PASSWORD_HASH); }
 }
 
-// NOTE: This page intentionally never fetches ship position data (battleship/teams/*/ships).
-// Only hit/miss outcomes (shotsReceived) and team names are loaded, which never reveal where
-// any ship is. Full fleet data and admin controls live on a separate, password-gated page.
-let TEAM_A_SHOTS={}, TEAM_B_SHOTS={};
-let bountyRevealCount = 0;
+async function checkAccess(){
+  const val=document.getElementById('gate-input').value;
+  const hash=await sha256(val);
+  if(hash===ADMIN_PASSWORD_HASH){
+    isAuthenticated = true;
+    document.getElementById('gate-wrap').style.display='none';
+    document.getElementById('main-content').style.display='block';
+    startDataLoad();
+  } else {
+    document.getElementById('gate-error').textContent='Incorrect password.';
+  }
+}
+document.getElementById('gate-input').addEventListener('keydown', e=>{ if(e.key==='Enter') checkAccess(); });
 
 function buildBountyRow(){
   const row=document.getElementById('bounty-row');
@@ -314,8 +291,25 @@ function buildBountyRow(){
     row.appendChild(tile);
   }
 }
+async function revealNextBounty(){
+  if(!isAuthenticated) return;
+  if(bountyRevealCount>=12) return;
+  await db.ref('battleship/bounty/revealCount').set(bountyRevealCount+1);
+}
+async function resetBounties(){
+  if(!isAuthenticated) return;
+  await db.ref('battleship/bounty/revealCount').set(0);
+}
 
-function buildTeamGrid(prefix, shots){
+function buildLegend(){
+  const el=document.getElementById('fleet-legend');
+  el.innerHTML='';
+  Object.entries(SHIP_COLORS).forEach(([name,color])=>{
+    el.innerHTML+=`<div class="legend-item"><div class="legend-swatch" style="background:${color}"></div>${name}</div>`;
+  });
+}
+
+function buildTeamGrid(prefix, shots, ships){
   const colH=document.getElementById(prefix+'-col-headers'), grid=document.getElementById(prefix+'-grid');
   colH.innerHTML='<div></div>';COLS.forEach(c=>colH.innerHTML+=`<div class="col-header">${c}</div>`);
   grid.innerHTML='';
@@ -327,10 +321,15 @@ function buildTeamGrid(prefix, shots){
       const cell=document.createElement('div');
       cell.className='cell';
       cell.dataset.coord=`${COLS[c]}${r+1}`;
+      if(ships[idx]){
+        const col=SHIP_COLORS[ships[idx]];
+        cell.classList.add('ship-revealed');
+        cell.style.borderColor=col;cell.style.color=col;cell.style.background=col+'22';
+      }
       const img=document.createElement('img');img.src=BASE+TILE_ITEMS[idx][0];img.onerror=function(){this.style.display='none';};cell.appendChild(img);
       if(shots[idx]){cell.dataset.shot=shots[idx]; shots[idx]==='hit'?hits++:misses++;}
       const ov=document.createElement('div');ov.className='overlay';cell.appendChild(ov);
-      cell.addEventListener('mouseenter',e=>showTip(e,`${cell.dataset.coord} · ${TILE_ITEMS[idx][1]}`));
+      cell.addEventListener('mouseenter',e=>showTip(e,`${cell.dataset.coord} · ${TILE_ITEMS[idx][1]}${ships[idx]?' · '+ships[idx]:''}`));
       cell.addEventListener('mouseleave',hideTip);
       grid.appendChild(cell);
     }
@@ -347,14 +346,19 @@ function moveTip(e){tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.
 
 function renderAll(){
   buildBountyRow();
-  buildTeamGrid('a', TEAM_A_SHOTS);
-  buildTeamGrid('b', TEAM_B_SHOTS);
+  buildTeamGrid('a', TEAM_A_SHOTS, TEAM_A_SHIPS);
+  buildTeamGrid('b', TEAM_B_SHOTS, TEAM_B_SHIPS);
 }
 
 function listenTeam(prefix, path){
   db.ref(path+'/name').on('value', snap=>{
     const name = snap.val() || (prefix==='a'?'Team A':'Team B');
     document.getElementById('team-'+prefix+'-header').textContent = '⚓ ' + name;
+  });
+  db.ref(path+'/ships').on('value', snap=>{
+    const data = snap.val() || {};
+    if(prefix==='a') TEAM_A_SHIPS = data; else TEAM_B_SHIPS = data;
+    renderAll();
   });
   db.ref(path+'/shotsReceived').on('value', snap=>{
     const data = snap.val() || {};
@@ -363,32 +367,55 @@ function listenTeam(prefix, path){
   });
 }
 
+async function changeAdminPassword(){
+  if(!isAuthenticated) return;
+  const val = document.getElementById('new-admin-pw').value;
+  if(!val){ document.getElementById('admin-pw-msg').textContent='Please enter a new password.'; return; }
+  ADMIN_PASSWORD_HASH = await sha256(val);
+  await db.ref('battleship/admin/passwordHash').set(ADMIN_PASSWORD_HASH);
+  document.getElementById('new-admin-pw').value = '';
+  const msg = document.getElementById('admin-pw-msg');
+  msg.textContent = 'Password updated and saved.';
+  setTimeout(()=>{ if(msg.textContent==='Password updated and saved.') msg.textContent=''; }, 4000);
+}
+
+async function resetEnemyWaters(){
+  if(!isAuthenticated) return;
+  if(!confirm('This clears all fired shots and the audit log for both teams. This cannot be undone. Continue?')) return;
+  await db.ref('battleship/teams/teamA/shotsReceived').remove();
+  await db.ref('battleship/teams/teamB/shotsReceived').remove();
+  await db.ref('battleship/teams/teamA/log').remove();
+  await db.ref('battleship/teams/teamB/log').remove();
+}
+
+async function toggleFleetLock(){
+  if(!isAuthenticated) return;
+  const snap = await db.ref('battleship/phase/fleetLocked').once('value');
+  const current = snap.val() || false;
+  await db.ref('battleship/phase/fleetLocked').set(!current);
+}
+db.ref('battleship/phase/fleetLocked').on('value', snap=>{
+  const locked = snap.val() || false;
+  const btn=document.getElementById('fleet-lock-btn');
+  if(btn) btn.textContent = locked ? 'Unlock My Fleet Pages' : 'Lock My Fleet Pages';
+});
+
 db.ref('battleship/bounty/revealCount').on('value', snap=>{
   bountyRevealCount = snap.val() || 0;
   buildBountyRow();
+  const btn=document.getElementById('reveal-next-btn');
+  if(!btn) return;
+  if(bountyRevealCount>=12){btn.textContent='All Bounties Revealed';btn.disabled=true;}
+  else{btn.textContent=`Reveal Next Bounty (${bountyRevealCount}/12)`;btn.disabled=false;}
 });
 
 let adminLogA = [], adminLogB = [];
-
 function listenAdminLogs(){
-  db.ref('battleship/teams/teamA/log').on('child_added', snap=>{
-    adminLogA.push(snap.val());
-    renderAdminLog('a', adminLogA);
-  });
-  db.ref('battleship/teams/teamA/log').on('child_removed', ()=>{
-    adminLogA = [];
-    renderAdminLog('a', adminLogA);
-  });
-  db.ref('battleship/teams/teamB/log').on('child_added', snap=>{
-    adminLogB.push(snap.val());
-    renderAdminLog('b', adminLogB);
-  });
-  db.ref('battleship/teams/teamB/log').on('child_removed', ()=>{
-    adminLogB = [];
-    renderAdminLog('b', adminLogB);
-  });
+  db.ref('battleship/teams/teamA/log').on('child_added', snap=>{ adminLogA.push(snap.val()); renderAdminLog('a', adminLogA); });
+  db.ref('battleship/teams/teamA/log').on('child_removed', ()=>{ adminLogA = []; renderAdminLog('a', adminLogA); });
+  db.ref('battleship/teams/teamB/log').on('child_added', snap=>{ adminLogB.push(snap.val()); renderAdminLog('b', adminLogB); });
+  db.ref('battleship/teams/teamB/log').on('child_removed', ()=>{ adminLogB = []; renderAdminLog('b', adminLogB); });
 }
-
 function renderAdminLog(prefix, entries){
   const list=document.getElementById('admin-log-'+prefix);
   if(!list) return;
@@ -409,14 +436,15 @@ function renderAdminLog(prefix, entries){
   });
 }
 
-async function init(){
-  buildFleetInfographic();
+// Ship/log data is only fetched after a successful password check — never beforehand.
+function startDataLoad(){
+  buildLegend();
   listenTeam('a', 'battleship/teams/teamA');
   listenTeam('b', 'battleship/teams/teamB');
   listenAdminLogs();
-  renderAll();
 }
-init();
+
+initAdminHash();
 </script>
 </body>
 </html>
