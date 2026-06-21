@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#07090e;--panel:#10131a;--border:#252830;
-  --gold:#c9a227;--gold-dim:#7a621a;--text:#c8c2b0;--text-dim:#5a5650;
+  --gold:#c9a227;--gold-dim:#7a621a;--text:#c8c2b0;--text-dim:#a39d90;
   --teamcolor:#e0517a;--hit:rgba(210,35,35,0.9);--miss:rgba(25,70,180,0.84);
   --cell:48px;
 }
@@ -67,7 +67,7 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
 .log-header button{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.03em;padding:6px 10px;border-radius:4px;border:1px solid var(--gold-dim);background:#1a1608;color:var(--gold);cursor:pointer;white-space:nowrap;}
 .log-header button:hover{box-shadow:0 0 10px #c9a22744;}
 .log-header button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
-.log-note{font-size:.62rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4;}
+.log-note{font-size:.65rem;color:var(--text-dim);margin-bottom:8px;line-height:1.4;}
 .log-list{max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;}
 .log-entry{font-size:.76rem;padding:6px 8px;border-radius:3px;background:#0b0e15;display:flex;justify-content:space-between;gap:8px;color:var(--text-dim);}
 .log-entry.hit{color:#e8716b;}
@@ -93,7 +93,7 @@ header p{font-size:.88rem;color:var(--text-dim);margin-top:5px;letter-spacing:.0
 .cell[data-shot="miss"] .overlay::after{content:"💨";}
 .cell.locked{cursor:not-allowed;opacity:.75;}
 .tooltip{position:fixed;background:#12141c;border:1px solid var(--gold-dim);border-radius:4px;padding:5px 11px;font-size:.86rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:260px;line-height:1.5;}
-.conn-status{position:fixed;top:8px;right:10px;font-size:.6rem;color:var(--text-dim);z-index:50;}
+.conn-status{position:fixed;top:8px;right:10px;font-size:.65rem;color:var(--text-dim);z-index:50;}
 .conn-status.ok{color:#4ade80;}
 .conn-status.err{color:#d06060;}
 </style>
@@ -425,6 +425,53 @@ function placeShip(idx){
     db.ref(TEAM_PATH+'/ships/'+idx).set(selectedShip);
   }
   renderFleetBoard();
+  recomputeShipInstances();
+}
+
+// Groups same-named tiles into individual physical ships via orthogonal flood fill.
+// Since ships can't touch each other orthogonally (only diagonally), any orthogonally
+// connected same-name tiles must belong to one single ship instance.
+function findShipInstances(shipsArr){
+  const visited = new Array(256).fill(false);
+  const instances = [];
+  for(let i=0;i<256;i++){
+    if(!shipsArr[i] || visited[i]) continue;
+    const name = shipsArr[i];
+    const stack=[i]; const tiles=[];
+    visited[i]=true;
+    while(stack.length){
+      const cur=stack.pop();
+      tiles.push(cur);
+      const r=Math.floor(cur/16), c=cur%16;
+      const neighbors=[];
+      if(r>0) neighbors.push(cur-16);
+      if(r<15) neighbors.push(cur+16);
+      if(c>0) neighbors.push(cur-1);
+      if(c<15) neighbors.push(cur+1);
+      neighbors.forEach(n=>{
+        if(!visited[n] && shipsArr[n]===name){ visited[n]=true; stack.push(n); }
+      });
+    }
+    instances.push({name, tiles});
+  }
+  return instances;
+}
+
+// Writes only a redacted summary (name/totalTiles/hitsTaken/sunk) — never coordinates —
+// so the live board and other teams can show sunk status without ever learning positions.
+async function recomputeShipInstances(){
+  const instances = findShipInstances(myShips);
+  const summary = {};
+  instances.forEach((inst, i)=>{
+    const hitsTaken = inst.tiles.filter(idx=>myIncomingShots[idx]).length;
+    summary['inst'+i] = {
+      name: inst.name,
+      totalTiles: inst.tiles.length,
+      hitsTaken,
+      sunk: hitsTaken === inst.tiles.length
+    };
+  });
+  await db.ref(TEAM_PATH+'/shipInstances').set(summary);
 }
 
 function renderFireBoard(){
@@ -528,6 +575,7 @@ function listenIncomingShots(){
     myIncomingShots=Array(256).fill('');
     Object.entries(data).forEach(([idx,val])=>{myIncomingShots[idx]=val;});
     if(fleetUnlocked) renderFleetBoard();
+    recomputeShipInstances();
   });
 }
 

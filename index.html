@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#07090e;--panel:#10131a;--border:#252830;
-  --gold:#c9a227;--gold-dim:#7a621a;--text:#c8c2b0;--text-dim:#5a5650;
+  --gold:#c9a227;--gold-dim:#7a621a;--text:#c8c2b0;--text-dim:#a39d90;
   --teamA:#22c55e;--teamB:#e0517a;--hit:rgba(210,35,35,0.9);--miss:rgba(25,70,180,0.84);
   --cell:36px;
 }
@@ -62,6 +62,12 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
 .team-board.b h2{color:var(--teamB);}
 .stat-line{font-size:.95rem;color:var(--text-dim);text-align:center;margin-bottom:10px;}
 .stat-line strong{color:var(--gold);}
+
+.fleet-status{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;}
+.fleet-status-chip{display:flex;align-items:center;gap:5px;font-size:.72rem;padding:4px 9px;border-radius:4px;border:1px solid var(--border);background:#0b0e15;color:var(--text-dim);}
+.fleet-status-chip.all-sunk{border-color:#7c1010;background:#1a0808;color:#f87171;}
+.fleet-status-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.fleet-status-chip.all-sunk .fleet-status-swatch{opacity:.5;}
 .col-headers,.grid{display:grid;grid-template-columns:20px repeat(16,var(--cell));gap:2px;}
 .col-headers{margin-bottom:2px;}
 .col-header,.row-header{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--gold-dim);display:flex;align-items:center;justify-content:center;}
@@ -113,6 +119,7 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
     <div class="team-board a">
       <h2 id="team-a-header">⚓ Team A</h2>
       <div class="stat-line">Hits taken: <strong id="a-hits">0</strong> / Misses: <strong id="a-misses">0</strong></div>
+      <div class="fleet-status" id="a-fleet-status"></div>
       <div class="col-headers" id="a-col-headers"></div>
       <div class="grid" id="a-grid"></div>
     </div>
@@ -121,6 +128,7 @@ header p{font-size:1rem;color:var(--text-dim);margin-top:5px;letter-spacing:.08e
     <div class="team-board b">
       <h2 id="team-b-header">⚓ Team B</h2>
       <div class="stat-line">Hits taken: <strong id="b-hits">0</strong> / Misses: <strong id="b-misses">0</strong></div>
+      <div class="fleet-status" id="b-fleet-status"></div>
       <div class="col-headers" id="b-col-headers"></div>
       <div class="grid" id="b-grid"></div>
     </div>
@@ -261,6 +269,26 @@ const SHIP_COLORS = {
   'Battleship':'#e0395a','Cruiser':'#a855f7','Destroyer':'#3b6fd6','Patrol Boat':'#38bdf8',
   'L-Shape':'#4ade80','T-Shape':'#facc15','Plus':'#fb923c'
 };
+const SHIP_TOTALS = {'Battleship':2,'Cruiser':4,'Destroyer':4,'Patrol Boat':3,'L-Shape':2,'T-Shape':2,'Plus':1};
+const SHIP_ORDER = ['Battleship','Cruiser','Destroyer','Patrol Boat','L-Shape','T-Shape','Plus'];
+
+function renderFleetStatus(prefix, shipInstances){
+  const el=document.getElementById(prefix+'-fleet-status');
+  if(!el) return;
+  const sunkCounts = {};
+  Object.values(shipInstances || {}).forEach(inst=>{
+    if(inst.sunk){ sunkCounts[inst.name] = (sunkCounts[inst.name]||0) + 1; }
+  });
+  el.innerHTML='';
+  SHIP_ORDER.forEach(name=>{
+    const sunk = sunkCounts[name] || 0;
+    const total = SHIP_TOTALS[name];
+    const chip=document.createElement('div');
+    chip.className='fleet-status-chip'+(sunk===total ? ' all-sunk' : '');
+    chip.innerHTML=`<div class="fleet-status-swatch" style="background:${SHIP_COLORS[name]}"></div>${name} ${sunk}/${total}${sunk===total?' ☠':''}`;
+    el.appendChild(chip);
+  });
+}
 const FLEET=[
   {name:'Battleship',count:2,tiles:5,grid:[[1,1,1,1,1]],note:'5 tiles'},
   {name:'Cruiser',count:4,tiles:4,grid:[[1,1,1,1]],note:'4 tiles'},
@@ -360,6 +388,9 @@ function listenTeam(prefix, path){
     const data = snap.val() || {};
     if(prefix==='a') TEAM_A_SHOTS = data; else TEAM_B_SHOTS = data;
     renderAll();
+  });
+  db.ref(path+'/shipInstances').on('value', snap=>{
+    renderFleetStatus(prefix, snap.val() || {});
   });
 }
 
